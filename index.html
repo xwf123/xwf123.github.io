@@ -79,6 +79,236 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2017/08/29/082903/" title="Express 框架介绍第一讲" itemprop="url">Express 框架介绍第一讲</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="John Doe" target="_blank" itemprop="author">John Doe</a>
+		
+  <p class="article-time">
+    <time datetime="2017-08-29T12:15:10.582Z" itemprop="datePublished"> 发表于 2017-08-29</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <h2 id="手动创建一个文件夹app，在当前文件下安装依赖，通过package-json来安装json内容"><a href="#手动创建一个文件夹app，在当前文件下安装依赖，通过package-json来安装json内容" class="headerlink" title="手动创建一个文件夹app，在当前文件下安装依赖，通过package.json来安装json内容"></a>手动创建一个文件夹app，在当前文件下安装依赖，通过package.json来安装json内容</h2><p>一个简洁而灵活的 node.js Web应用框架, 提供了一系列强大特性帮助你创建各种 Web 应用，和丰富的 HTTP 工具。</p>
+<h3 id="Express-框架核心特性"><a href="#Express-框架核心特性" class="headerlink" title="Express 框架核心特性"></a>Express 框架核心特性</h3><p>1、可以设置中间件来响应 HTTP 请求。<br>2、定义了路由表用于执行不同的 HTTP 请求动作。<br>3、可以通过向模板传递参数来动态渲染 HTML 页面。<br>4、需要安装express另外几个模块是需要和express一起安装的：安装完后查看express的版本号：cnpm list express</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">$ cnpm install express --save</div><div class="line">$ cnpm install body-parser --save</div><div class="line">$ cnpm install cookie-parser --save</div><div class="line">$ cnpm install multer --save</div></pre></td></tr></table></figure>
+<p>body-parser - node.js 中间件，用于处理 JSON, Raw, Text 和 URL 编码的数据。<br>cookie-parser - 这就是一个解析Cookie的工具。通过req.cookies可以取到传过来的cookie，并把它们转成对象。<br>multer - node.js 中间件，用于处理 enctype=”multipart/form-data”（设置表单的MIME编码）的表单数据。</p>
+<p>EXPRESs 应用使用回调函数的参数，request和response对象来处理请求和响应数据</p>
+<h3 id="代码实例"><a href="#代码实例" class="headerlink" title="代码实例"></a>代码实例</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">app.get(<span class="string">'/'</span>, <span class="keyword">function</span> (req, res) &#123;</div><div class="line">   // --</div><div class="line">&#125;)</div></pre></td></tr></table></figure>
+<p>在HTTP请求中，路由决定了由谁(指定脚本)去响应客户端请求。通过路由提取出请求的URL以及GET/POST参数<br>Express的模板引擎常用的是ejs和jade。它预留了变量，res.render()就是将我们的数据填充到模板后展示出完整的页面。res.render(file,option)是express中专门渲染视图用的。渲染的意思就是 option数据以什么形式展现出来。<br>把app.render当成一个生成视图的工具，而且res.render内部也是调用了app.render。<br>区别是这样：app.render只负责生成视图，你会发现它是没能力把视图响应给客户端（浏览器）的，只有res.render手里有response对象，可以把视图响应给客户端。</p>
+<h3 id="2、编写代码"><a href="#2、编写代码" class="headerlink" title="2、编写代码"></a>2、编写代码</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div></pre></td><td class="code"><pre><div class="line"> res.render = <span class="keyword">function</span>(view, locals, cb)&#123;</div><div class="line">    app.render(view, locals, <span class="keyword">function</span>(err, html)&#123;</div><div class="line">        <span class="keyword">if</span>(typeof cb !== <span class="string">'undefined'</span>)&#123;</div><div class="line">            <span class="built_in">return</span> cb(err, html);</div><div class="line">        &#125;</div><div class="line">        res.send(html);</div><div class="line">    &#125;);</div><div class="line">&#125;;</div><div class="line"></div><div class="line">nodejs express ses sion 身份验证</div><div class="line">1）引入模块</div><div class="line">var session = require(<span class="string">'express-session'</span>); </div><div class="line">var cookieParser = require(<span class="string">'cookie-parser'</span>);</div><div class="line">2）应用cookie及session</div><div class="line">app.use(cookieParser()); </div><div class="line">app.use(session(&#123; </div><div class="line">resave: <span class="literal">true</span>, // don<span class="string">'t save session if unmodified </span></div><div class="line">saveUninitialized: false, // don't create session until something stored </div><div class="line">secret: <span class="string">'love'</span></div><div class="line">&#125;));</div><div class="line">3）请求时，应用身份验证</div><div class="line">app.use(<span class="keyword">function</span>(req,res,next)&#123; </div><div class="line"><span class="keyword">if</span> (!req.session.user) &#123; </div><div class="line"><span class="keyword">if</span>(req.url==<span class="string">"/login"</span>)&#123; </div><div class="line">next();//如果请求的地址是登录则通过，进行下一个请求 </div><div class="line">&#125;<span class="keyword">else</span>&#123; res.redirect(<span class="string">'/login'</span>) &#125; </div><div class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (req.session.user) &#123; next(); </div><div class="line">&#125;</div><div class="line"> &#125;);</div><div class="line">4）登陆设计</div><div class="line">app.get(<span class="string">'/login'</span>,<span class="keyword">function</span>(req,res)&#123; </div><div class="line">res.render(<span class="string">"login"</span>); </div><div class="line">&#125;); </div><div class="line">app.post(<span class="string">'/login'</span>,<span class="keyword">function</span>(req,res)&#123; </div><div class="line"><span class="keyword">if</span>(req.body.username==<span class="string">"love"</span> &amp;&amp; req.body.password==<span class="string">"love"</span>)&#123; </div><div class="line">var user = &#123;<span class="string">'username'</span>:<span class="string">'love'</span>&#125;; </div><div class="line">req.session.user = user; </div><div class="line">res.redirect(<span class="string">'/admin/app/list'</span>); </div><div class="line">&#125; </div><div class="line"><span class="keyword">else</span></div><div class="line">&#123; </div><div class="line">res.redirect(<span class="string">'/login'</span>); </div><div class="line">&#125; </div><div class="line">&#125;); </div><div class="line">app.get(<span class="string">'/logout'</span>,<span class="keyword">function</span>(req,res)&#123; </div><div class="line">req.session.user = null; </div><div class="line">res.redirect(<span class="string">'/login'</span>); </div><div class="line">&#125;);</div><div class="line"></div><div class="line"></div><div class="line">静态文件</div><div class="line">Express 提供了内置的中间件 express.static 来设置静态文件如：图片， CSS, JavaScript 等。</div><div class="line">你可以使用 express.static 中间件来设置静态文件路径。</div><div class="line">app.use(express.static(<span class="string">'public'</span>));</div></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
+
+        
+        
+        <p class="article-more-link">
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/08/29/082904/" title="vue2js踩过的坑" itemprop="url">vue2js踩过的坑</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="John Doe" target="_blank" itemprop="author">John Doe</a>
+		
+  <p class="article-time">
+    <time datetime="2017-08-29T12:15:09.771Z" itemprop="datePublished"> 发表于 2017-08-29</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <h3 id="1、vuejs构建组件使用"><a href="#1、vuejs构建组件使用" class="headerlink" title="1、vuejs构建组件使用"></a>1、vuejs构建组件使用</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">Vue.component(<span class="string">'componentName'</span>,&#123; /*component*/ &#125;)</div><div class="line">这里注意一点，组件要先注册再使用，</div><div class="line">Vue.component(<span class="string">'mine'</span>,&#123;</div><div class="line">           template:<span class="string">'#mineTpl'</span>,</div><div class="line">           props:[<span class="string">'name'</span>,<span class="string">'title'</span>,<span class="string">'city'</span>,<span class="string">'content'</span>]</div><div class="line">        &#125;);</div><div class="line"></div><div class="line"> var v=new Vue(&#123;</div><div class="line">      el:<span class="string">'#vueInstance'</span>,</div><div class="line">      data:&#123;</div><div class="line">          name:<span class="string">'zhang'</span>,</div><div class="line">          title:<span class="string">'this is title'</span>,</div><div class="line">         city:<span class="string">'Beijing'</span>,</div><div class="line">         content:<span class="string">'these are some desc about Blog'</span></div><div class="line">     &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+<h3 id="2、指令keep-alive"><a href="#2、指令keep-alive" class="headerlink" title="2、指令keep-alive"></a>2、指令keep-alive</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">在看demo的时候看到在vue-router写着keep-alive，keep-alive的含义：</div><div class="line">如果把切换出去的组件保留在内存中，可以保留它的状态或避免重新渲染。为此可以添加一个keep-alive指令</div><div class="line">&lt;component :is=<span class="string">'curremtView'</span> keep-alive&gt;&lt;/component&gt;</div></pre></td></tr></table></figure>
+<h3 id="3-如何让css只在当前组件中起作用"><a href="#3-如何让css只在当前组件中起作用" class="headerlink" title="3.如何让css只在当前组件中起作用"></a>3.如何让css只在当前组件中起作用</h3><p>在每一个vue组件中都可以定义各自的css，js，如果希望组件内写的css只对当前组件起作用，只需要在style中写入scoped:</p>
+<style scoped></style>
+
+
+<h3 id="4、插入循环图片"><a href="#4、插入循环图片" class="headerlink" title="4、插入循环图片"></a>4、插入循环图片</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">&lt;div class=<span class="string">"bio-slide"</span> v-for=<span class="string">"item in items"</span>&gt;   </div><div class="line">    &lt;img src=<span class="string">"&#123;&#123;item.image&#125;&#125;"</span>&gt;</div><div class="line">&lt;/div&gt;</div><div class="line">此时在控制台会出现警告</div><div class="line">[Vue Warn]: src=<span class="string">"&#123;&#123;item.image&#125;&#125;"</span>: interpolation <span class="keyword">in</span> <span class="string">"src"</span> attribute will cause a 404 request. Use v-bind:src instead.这里意思是在“src”属性插值将导致404请求。使用v-bind：src代替。 </div><div class="line">所以应该是：</div><div class="line">&lt;div class=<span class="string">"bio-slide"</span> v-for=<span class="string">"item in items"</span>&gt;&lt;img v-bind:src=<span class="string">"item.image"</span>&gt;&lt;/div&gt;</div><div class="line">这里需要主要，v-bind在写的时候不能再用&#123;&#123;&#125;&#125;，根据官方的说法</div><div class="line">&lt;a v-bind:href=<span class="string">"url"</span>&gt;&lt;/a&gt;</div><div class="line">这里 href 是参数，它告诉 v-bind 指令将元素的 href 特性跟表达式 url 的值绑定。可能你已注意到可以用特性插值href=<span class="string">"&#123;&#123;url&#125;&#125;"</span> 获得同样的结果：这样没错，并且实际上在内部特性插值会转为 v-bind 绑定。</div></pre></td></tr></table></figure>
+<h3 id="5、绑定value到Vue实例的一个动态属性上"><a href="#5、绑定value到Vue实例的一个动态属性上" class="headerlink" title="5、绑定value到Vue实例的一个动态属性上"></a>5、绑定value到Vue实例的一个动态属性上</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div><div class="line">175</div><div class="line">176</div><div class="line">177</div><div class="line">178</div><div class="line">179</div><div class="line">180</div><div class="line">181</div><div class="line">182</div><div class="line">183</div><div class="line">184</div><div class="line">185</div><div class="line">186</div><div class="line">187</div><div class="line">188</div><div class="line">189</div><div class="line">190</div><div class="line">191</div><div class="line">192</div><div class="line">193</div><div class="line">194</div></pre></td><td class="code"><pre><div class="line">对于单选按钮，勾选框及选择框选项，v-model绑定的value通常是静态字符串（对于勾选框是逻辑值），但是有时候想绑定value到vue实例的一个动态属性上，这时可以用v-bind实现，并且这个属性的值可以不是字符串。例如绑定Checkbox的value到vue实例的一个动态属性：</div><div class="line">&lt;input </div><div class="line">    <span class="built_in">type</span>=<span class="string">"checkbox"</span></div><div class="line">    v-model=<span class="string">"toggle"</span></div><div class="line">    v-bind:<span class="literal">true</span>-value=<span class="string">"a"</span></div><div class="line">    v-bind:<span class="literal">false</span>-value=<span class="string">"b"</span>&gt;</div><div class="line">&lt;p&gt;&#123;&#123;toggle&#125;&#125;&lt;/p&gt;</div><div class="line">这里绑定后，并不是说就可以点击后由<span class="literal">true</span>,<span class="literal">false</span>的切换变为a,b的切换，因为这里定义的动态a，b是scope上的a,b，并不能直接显示出来，此时</div><div class="line">//当选中时</div><div class="line">vm.toggle === vm.a</div><div class="line">//当没选中时</div><div class="line">vm.toggle === vm.b</div><div class="line">所以此时需要在data中定义a,b</div><div class="line">new Vue(&#123;</div><div class="line">    el:<span class="string">'...'</span>,</div><div class="line">    data:&#123;</div><div class="line">        a:<span class="string">'a'</span>,</div><div class="line">        b:<span class="string">'b'</span>    </div><div class="line">    &#125;</div><div class="line">&#125;);</div><div class="line"></div><div class="line"></div><div class="line">6片段实例</div><div class="line">下面几种情况会让实例变成一个片断实例：</div><div class="line">模板包含多个顶级元素。</div><div class="line">模板只包含普通文本。</div><div class="line">模板只包含其它组件（其它组件可能是一个片段实例）。</div><div class="line">模板只包含一个元素指令，如&lt;partial&gt; 或 vue-router 的 &lt;router-view&gt;。</div><div class="line">模板根节点有一个流程控制指令，如 v-if 或 v-for。</div><div class="line">这些情况让实例有未知数量的顶级元素，它将把它的 DOM 内容当作片断。片断实例仍然会正确地渲染内容。不过，它没有一个根节点，它的<span class="variable">$el</span> 指向一个锚节点，即一个空的文本节点（在开发模式下是一个注释节点）。</div><div class="line">但是更重要的是，组件元素上的非流程控制指令，非 prop 特性和过渡将被忽略，因为没有根元素供绑定：</div><div class="line">&lt;!-- 不可以，因为没有根元素 --&gt;</div><div class="line">&lt;example v-show=<span class="string">"ok"</span> transition=<span class="string">"fade"</span>&gt;&lt;/example&gt; </div><div class="line">&lt;!-- props 可以 --&gt;</div><div class="line">&lt;example :prop=<span class="string">"someData"</span>&gt;&lt;/example&gt;</div><div class="line"> &lt;!-- 流程控制可以，但是不能有过渡 --&gt;</div><div class="line">&lt;example v-if=<span class="string">"ok"</span>&gt;&lt;/example&gt;</div><div class="line">片段实例也有用处，但是通常情况下组件有一个根节点比较好，它会保证组件元素上的指令和特性能正确的转换，同时性能也稍微好些。</div><div class="line">7、路由嵌套</div><div class="line">路由嵌套会将其他组件渲染到该组件内，而不是进行整个页面跳转router-view本身就是将组件渲染到该位置，想要进行页面跳转，就要将页面渲染到根组件，在起始配置路由时候写到：</div><div class="line">var App = Vue.extend(&#123; root &#125;);</div><div class="line">router.start(App,<span class="string">'#app'</span>);</div><div class="line">这里首先将根组件注册进来，用于将路由中配置好的各个页面渲染出来，然后将根组件挂载到与<span class="comment">#app匹配的元素上</span></div><div class="line">8.实现多个根据不同条件显示不同文字的方法</div><div class="line">v-if,v-else可以实现条件选择，但是如果是多个连续的条件选择，则需要用到计算属性computed。例如实现当输入框中什么都没写的时候显示字符串‘empty’,否则显示输入框中的内容，&lt;div id=<span class="string">"test"</span>&gt;</div><div class="line">  &lt;input <span class="built_in">type</span>=<span class="string">"text"</span> v-model=<span class="string">"inputValue"</span>&gt;</div><div class="line">  &lt;h1&gt;&#123;&#123;changeVaule&#125;&#125;&lt;/h1&gt;</div><div class="line">&lt;/div&gt;</div><div class="line">new Vue(&#123;</div><div class="line">  el:<span class="string">'#test'</span>,</div><div class="line">  data:&#123;</div><div class="line">    changeVaule:<span class="string">'123'</span></div><div class="line">  &#125;,</div><div class="line">  computed :&#123;</div><div class="line">    changeVaule:<span class="function"><span class="title">function</span></span>()&#123;</div><div class="line">      <span class="keyword">if</span>(this.inputValue!==<span class="string">''</span>)&#123;</div><div class="line">        <span class="built_in">return</span> this.inputValue;</div><div class="line">      &#125;<span class="keyword">else</span>&#123;</div><div class="line">        <span class="built_in">return</span> <span class="string">'empty'</span>;</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">&#125;);</div><div class="line">9、Vuejs在变化检测问题</div><div class="line">1.检测数组</div><div class="line">由于javascript的限制，vuejs不能检测到下面数组的变化：</div><div class="line">直接索引设置元素，如vm.item[0]=&#123;&#125;;</div><div class="line">修改数据的长度，如vm.item.length。</div><div class="line">为了解决问题1，Vuejs扩展了观察数组，为它添加一个<span class="variable">$set</span>()方法：</div><div class="line">// 与 `example1.items[0] = ...` 相同，但是能触发视图更新</div><div class="line">example1.items.<span class="variable">$set</span>(0, &#123; childMsg: <span class="string">'Changed!'</span>&#125;)</div><div class="line">问题2，需要一个空数组替换items。</div><div class="line">除了<span class="variable">$set</span>()，vuejs也为观察数组添加了<span class="variable">$remove</span>()方法，用于从目标数组中查找并删除元素，在内部调用了splice()。因此，不必：</div><div class="line">var index = this.items.indexOf(item)</div><div class="line"><span class="keyword">if</span> (index !== -1) &#123;</div><div class="line">  this.items.splice(index, 1)</div><div class="line">&#125;</div><div class="line">只需：</div><div class="line">this.items.<span class="variable">$remove</span>(item);</div><div class="line">2.检测对象</div><div class="line">受ES5的显示，Vuejs不能检测到对象属性的添加或删除。因为Vuejs在初始化时候将属性转化为getter/setter，所以属性必须在data对象才能让Vuejs转换它，才能让它是响应的，例如：</div><div class="line">var data = &#123; a: 1 &#125;</div><div class="line">var vm = new Vue(&#123;</div><div class="line">  data: data</div><div class="line">&#125;)</div><div class="line">// `vm.a` 和 `data.a` 现在是响应的</div><div class="line"> vm.b = 2</div><div class="line">// `vm.b` 不是响应的</div><div class="line"> data.b = 2</div><div class="line">// `data.b` 不是响应的</div><div class="line">不过，有办法在实例创建之后添加属性并且让它是响应的。对于Vue实例，可以使用<span class="variable">$set</span>(key,value)实例方法：</div><div class="line">vm.<span class="variable">$set</span>(<span class="string">'b'</span>, 2)</div><div class="line">// `vm.b` 和 `data.b` 现在是响应的</div><div class="line">对于普通数据对象，可以使用全局方法Vue.set(object, key, value):</div><div class="line">Vue.set(data, <span class="string">'c'</span>, 3)</div><div class="line">// `vm.c` 和 `data.c` 现在是响应的</div><div class="line"></div><div class="line"></div><div class="line">10、关于vuejs页面闪烁&#123;&#123;message&#125;&#125;</div><div class="line">在vuejs指令中有v-cloak，这个指令保持在元素上直到关联实例结束编译。和CSS规则如[v-cloak]&#123;display:none&#125;一起用时，这个指令可以隐藏未编译的Mustache标签直到实例准备完毕。用法如下：这样&lt;div&gt;不会显示，直到编译结束</div><div class="line">[v-cloak]&#123;</div><div class="line">    display:none;</div><div class="line">&#125;</div><div class="line">&lt;div v-cloak&gt;&#123;&#123;message&#125;&#125;&lt;/div&gt;</div><div class="line">11、关于在v-for循环时候v-model的使用</div><div class="line">有时候需要循环生成input，用v-model绑定后，利用vuejs操作它，此时我们可以在v-model中写一个数组selected[<span class="variable">$index</span>]，这样就可以给不同的input绑定不同的v-model，从而分别操作他们。这个我在demo中的dataBind.vue中用到。</div><div class="line">12、指令v-el的使用</div><div class="line">有时候我们想就像使用jquery那样去访问一个元素，此时就可以使用v-el指令，去给这个元素注册一个索引，方便通过所属实例的<span class="variable">$el</span>访问这个元素。</div><div class="line">注意</div><div class="line">HTML不区分大小写，所以v-el:someEl将转换为全小写。可以用v-el:some-el然后设置this.<span class="variable">$el</span>.someEl。</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">&lt;span v-el:msg&gt;hello&lt;/span&gt;</div><div class="line">&lt;span v-el:other-msg&gt;world&lt;/span&gt;</div><div class="line">this.<span class="variable">$els</span>.msg.textContent // -&gt; <span class="string">"hello"</span></div><div class="line">this.<span class="variable">$els</span>.otherMsg.textContent // -&gt; <span class="string">"world"</span></div><div class="line">this.<span class="variable">$els</span>.msg //-&gt;&lt;span&gt;hello&lt;/span&gt;</div><div class="line">14、关于vuejs中使用事件名</div><div class="line">在vuejs中，我们经常要绑定一些事件，有时候给DOM元素绑定，有时候给组件绑定。绑定事件在HTML中用v-on:click-<span class="string">"event"</span>,这时evet的名字不要出现大写，因为在1.x中不区分大小写，所以如果我们在HTML写v-on:click=<span class="string">"myEvent"</span>而在js中写myEvent就出错误，所以在vuejs的1.x绑定事件时候，要尽量避免使用大写字母。在2.0中没有该限制！</div><div class="line">15、v-if和v-show的区别</div><div class="line">v-if直接不渲染这个DOM元素，而v-show是会渲染DOM元素，只是使用display:none隐藏，打开开发者工具可以看到该DOM</div><div class="line">16、关于transition全局钩子如何在组件中使用</div><div class="line">Vue.transition是定义一个全局transition钩子的，如果想针对组件定义，这样fade这个过度钩子只会作用于组件内，如果同时有同名的全局钩子，则会优先使用组建定义的</div><div class="line"><span class="built_in">export</span> default&#123;</div><div class="line">    transition:&#123;</div><div class="line">        <span class="string">'fade'</span>:&#123;</div><div class="line">            <span class="function"><span class="title">enter</span></span>() &#123;&#125;,</div><div class="line">            <span class="function"><span class="title">leave</span></span>() &#123;&#125;</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line">&#125;</div><div class="line">17、利用vue-router如何实现组件在渲染出来前执行某个事件</div><div class="line"><span class="built_in">export</span> default&#123;</div><div class="line">    <span class="function"><span class="title">data</span></span>()&#123;</div><div class="line">        <span class="built_in">return</span>&#123;</div><div class="line">            selected:0,</div><div class="line">            currentView:<span class="string">'view_0'</span></div><div class="line">        &#125;</div><div class="line">    &#125;,</div><div class="line">    methods:&#123;</div><div class="line">        choose(index) &#123;</div><div class="line">            this.selected=index;</div><div class="line">            this.currentView=<span class="string">'view_'</span>+index;</div><div class="line">        &#125;</div><div class="line">    &#125;,</div><div class="line">    route:&#123;</div><div class="line">        <span class="function"><span class="title">data</span></span>() &#123;</div><div class="line">            /*每次切换路由，在渲染出页面前都会执行*/</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">18、过滤器</div><div class="line">vue2.0里，不再有自带的过滤器，需要自己定义过滤器。定义的方法如下： </div><div class="line">注册一个自定义过滤器，它接收两个参数：过滤器 ID 和过滤器函数。</div><div class="line">Vue.filter(<span class="string">'filtername'</span>,<span class="keyword">function</span>(value,参数)&#123; </div><div class="line">  <span class="built_in">return</span> 参数+value.split(<span class="string">''</span>).reverse().join(<span class="string">''</span>); </div><div class="line">  </div><div class="line"> &#125;);</div><div class="line"><span class="keyword">function</span>里第一个参数value默认为使用这个过滤器的data对象内的值，在本例中是msg的值<span class="string">'you are mine'</span>。 </div><div class="line">坑1：第一个参数必须为自身的值，后面可以加任意多的参数。数序颠倒就会出错。</div><div class="line">下面来一个最常见的小例子来说明在使用vue2.0过滤器并结合v-text时遇到的其他的几个坑：</div><div class="line">需求：在页面输出一段反转顺序的字符串</div><div class="line">&lt;script&gt; </div><div class="line">window.onload=<span class="function"><span class="title">function</span></span>()&#123; </div><div class="line"> //类似于自定义指令，可以用全局方法 Vue.filter() 注册一个自定义过滤器，它接收两个参数：过滤器 ID 和过滤器函数。 </div><div class="line"> Vue.filter(<span class="string">'reverseString'</span>,<span class="keyword">function</span>(value,myString)&#123; </div><div class="line">  // <span class="keyword">function</span>里第一个参数value默认为使用这个过滤器的data值，在本例中是msg的值<span class="string">'you are mine'</span>。请注意：第一个参数必须为自身的值，后面可以加任意多的参数 </div><div class="line">  <span class="built_in">return</span> myString+value.split(<span class="string">''</span>).reverse().join(<span class="string">''</span>); </div><div class="line">  </div><div class="line"> &#125;); </div><div class="line">  </div><div class="line"> new Vue(&#123; </div><div class="line">  el:<span class="string">'#box'</span>, </div><div class="line">  data:&#123; </div><div class="line">   msg:<span class="string">'you are mine'</span>  </div><div class="line">  &#125;  </div><div class="line"> &#125;); </div><div class="line">&#125;; </div><div class="line">&lt;/script&gt; </div><div class="line">&lt;div id=<span class="string">'box'</span>&gt; </div><div class="line"> &lt;p&gt;msg is: &lt;br&gt;&#123;&#123;msg&#125;&#125;&lt;/p&gt; </div><div class="line"> &lt;hr&gt; </div><div class="line"> &lt;p&gt;reverse msg is: &lt;br&gt;&#123;&#123;msg|reverseString( <span class="string">'Hello:'</span> )&#125;&#125;&lt;/p&gt;&lt;!-- 在vue2.0里 过滤器只能用类似函数的写法reverseString( <span class="string">'I must tell you:'</span>)，括号内是参数，不同于vue1.0的用空格后加参数的写法<span class="string">" msg|reverseString 'I must tell you:' "</span> --&gt;</div><div class="line">  </div><div class="line"> &lt;!-- &lt;p v-text=<span class="string">"msg|reverseString( 'I must tell you:' )"</span>&gt;&lt;/p&gt;失效 --&gt;</div><div class="line"> &lt;!-- v-text里用过滤器失效，原因是在vue2.0里 管道符‘|<span class="string">'只能用在mousetache和v-bind中 --&gt;</span></div><div class="line">&lt;/div&gt;</div><div class="line">输出结果：msg is:  </div><div class="line">you are mine </div><div class="line">       reverse msg is:  </div><div class="line">Hello:enim era uoy</div><div class="line">坑2：在vue2.0里 过滤器只能用类似函数的写法reverseString( ‘I must tell you:')，括号内是参数，不同于vue1.0的用空格后加参数的写法；</div><div class="line">坑3：v-text里用过滤器失效，原因是在vue2.0里 管道符‘|<span class="string">'只能用在mousetache和v-bind中。</span></div></pre></td></tr></table></figure>
+
+        
+        
+        <p class="article-more-link">
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/08/29/082902/" title="读《一千零一夜》团队管理总结" itemprop="url">读《一千零一夜》团队管理总结</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="John Doe" target="_blank" itemprop="author">John Doe</a>
+		
+  <p class="article-time">
+    <time datetime="2017-08-29T11:58:40.511Z" itemprop="datePublished"> 发表于 2017-08-29</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <h3 id="本书共四章，第一章总结如下"><a href="#本书共四章，第一章总结如下" class="headerlink" title="本书共四章，第一章总结如下"></a>本书共四章，第一章总结如下</h3><p>这一章主要介绍了项目经理们日常日常基础工作的一些做法和感受。讨论了基础的估算、计划、站会、白板、报告、回顾、风险、沟通等方面该怎么做，也提出了新手在初任项目经理阶段所需要注意的问题及修炼之路。</p>
+<h3 id="这一章主要介绍了项目经理们日常日常基础工作的一些做法和感受"><a href="#这一章主要介绍了项目经理们日常日常基础工作的一些做法和感受" class="headerlink" title="这一章主要介绍了项目经理们日常日常基础工作的一些做法和感受"></a>这一章主要介绍了项目经理们日常日常基础工作的一些做法和感受</h3><p>讨论了基础的估算、计划、站会、白板、报告、回顾、风险、沟通等方面该怎么做，也提出了新手在初任项目经理阶段所需要注意的问题及修炼之路。</p>
+<h3 id="2、编写文件入口"><a href="#2、编写文件入口" class="headerlink" title="2、编写文件入口"></a>2、编写文件入口</h3><h2 id="首先，来说说对新手项目经理的五个建议："><a href="#首先，来说说对新手项目经理的五个建议：" class="headerlink" title="首先，来说说对新手项目经理的五个建议："></a>首先，来说说对新手项目经理的五个建议：</h2><h3 id="建议一：多想想项目到底需要什么。"><a href="#建议一：多想想项目到底需要什么。" class="headerlink" title="建议一：多想想项目到底需要什么。"></a>建议一：多想想项目到底需要什么。</h3><p>在接手项目之前，与项目中的重要干系人加强沟通，理解前因后果，每个项目都有它独特的需求，时间、成本、质量到底哪个因素更重要？</p>
+<h3 id="建议二：不要凡事恨不得事必躬亲。"><a href="#建议二：不要凡事恨不得事必躬亲。" class="headerlink" title="建议二：不要凡事恨不得事必躬亲。"></a>建议二：不要凡事恨不得事必躬亲。</h3><p>替别人办他们本该自己做的事情，对于团队长期而言效率是最低的，想办法让别人去做好它，成功施加影响的三个要素：获知（Awareness）、动力（Desire）、能力（Ability）。要获取理解和认同，激发动力，确保他能有相应的能力来做好这件事。</p>
+<p>###建议三：不要追在别人后边做监工。</p>
+<p>先把项目逻辑捋清楚，建立一套对应的流程规则，明确各个角色在过程中国的职责，并获得大家的认同，让这个机制运转起来，通过这个规则在约束大家的行为，项目经理主要是以引为主。</p>
+<h3 id="建议四：言必行，行必果。"><a href="#建议四：言必行，行必果。" class="headerlink" title="建议四：言必行，行必果。"></a>建议四：言必行，行必果。</h3><p>做任何事情都要有始有终，给自己一个响应，给大家一个交代，赢得团队对你的信任，建立自己的可信度，而信任的获取，靠的是一件件事件中一点一滴的积累，没有捷径可走。</p>
+<h3 id="建议五：不一定要强势，但一定要内心足够强大。"><a href="#建议五：不一定要强势，但一定要内心足够强大。" class="headerlink" title="建议五：不一定要强势，但一定要内心足够强大。"></a>建议五：不一定要强势，但一定要内心足够强大。</h3><p>一个专业的项目经理会尽可能的让自己客观公正，但是无论多客观，还是有形形色色的人和形形色色的世界观和人生观，遇到此类形色之类，应当以求同异存的心态对待，找出一致的地方并努力放大，不一定请示，在一些事情上可以妥协，可以让步，但是内心一定要有自己的坚持。</p>
+<h3 id="一个优秀的项目经理的三重境界：做项目，懂业务，懂人。"><a href="#一个优秀的项目经理的三重境界：做项目，懂业务，懂人。" class="headerlink" title="一个优秀的项目经理的三重境界：做项目，懂业务，懂人。"></a>一个优秀的项目经理的三重境界：做项目，懂业务，懂人。</h3><p>做项目是让项目进行下去，需要在满足项目铁三角（范围，时间，成本和质量）的情况下交付项目。<br>懂业务是知其然知其所以然，需要从业务的角度去引导和参与规划，定义项目，清楚的知道为什么立项这个项目，它所带来的业务价值是什么，是通过权衡哪些不同方案和利弊后才做出这样的选择，外部环境有什么样的制约，项目最大的风险是什么，只有自我认同项目的价值，才能在后续的执行当中、讨论过程中遇到问题时能及时说服其他项目成员对项目的认同。<br>这样项目才能高效率的顺利进行。<br>懂人是能够在利益相关人满意的基础上交付项目。根据人员不同诉求，在能满足项目交付，又能满足项目人员的个人发展要求，将在项目中结合人员的诉求参与项目，要有一种平衡团队中不同人诉讼的能力。另外要带着同理心去交付项目，士为知己者死。</p>
+<p>《孙子兵法》中说：“水异地而制流，兵因敌而制胜，兵无常势，水无常形，能因敌变化而取胜者，谓之神也”，项目管理也一样，从做项目，懂业务到懂人，虽然是一个递进的过程，但是对于不同的环境仍然需要灵活应变，在不同的组织环境中，需要将重点放到不同的境界。<br>再说说估算那些事！<br>俗话说，行百里者半九十，意思是说一百里路走了前面九十里，其实只完成了一半，剩下的十里仍需要花很久的时间。对于估算，团队常有这样的困惑。花了大把的时间来估算，最后发下与实际还是有不小的偏差，那到底有必要做估算吗？怎样做估算？<br>估算可以为我们找到一个合理的计划，给用户、管理层以及团队自己一个稳定的预期，相应的规划安排自己的工作。<br>估算的常用几种形式：<br>1、自下而上的估算，由开发人员估算自己的任务时间然后将所有的任务汇总，并考虑过任务间的依赖关系后，就排出了计划。这种估算对团队要求比较高：成员间的业务独立性比较强，各成员的经验相对丰富，这种估算的优势：估算率比较高，各自任务的估算可以并行进行；准确度也会比较高，大家对自己的任务和能力都比较熟悉。<br>2、扑克估算，负责人对某个需求要进行需求分析和任务讲解，讲解完后，所有人提问关于需求和任务的问题，都了解以后，就开始每个成员对此项目进行评估，如果A和B估算的时间偏差太大，就有A和B说出各自的理由，这样一轮下来，大家会对项目加深了理解，再继续下一轮直到接近大家的平均值，这样估算的好处是：集合了所有团队成员的意见，比一个人估算少了很多主观成分；在估算过程中，强化和深入了大家对需求和任务的理解，将任务更加细致化，将潜在的冲突公开化、台面化、让大家去充分碰撞，降低了一切不确定性带来的冲击；当然这种估算也相对比较有趣。团队在经过几次迭代之后，基本上确定了团队的开发速率。它的特点是，开发语言要统一，另外成员对相互的业务比较熟悉，有合作过，沉淀过同一个产品！<br>关于估算要注意的几点：估算仅是预测，对外承诺项目完成时间，最好提供一个日期范围，让听者知道你的估算只是预测；不管什么估算，将任务分成更细腻总是有利于估算的；团队需要练习估算方式并且手机反馈，每次对应的开发结束后都需要回过头来看卡当初的估算是否合理，分析并调整未来估算的方向；估算需要反复进行，当项目进行一半的时候，发现估算过于乐观了，就需要在剩下的工作中进行重新评估。</p>
+<p>当然有了估算，接下来就说说进度计划，制定项目进度计划是项目经理必备技能<br>艾森豪威尔说：没有战争是根据计划而胜利的，但是没有计划，战争也无法胜利。可见计划的重要性正如人们常说的：钱不是万能的，但没有钱是万万不能的，在项目管理中，进度计划也同样拥有举足轻重的作用。好的计划一定是团队共同参与才能制定出来的，计划的本质是团队对何时完成任务的承诺，一旦做出承诺，来自内心和外部的压力会迫使我们按照承诺去做，也正是因为这种下意识的一致性倾向，才让进度计划真正有效。现在的计划都在KPI指标当中，通过WBS将各部门的工作量详细估算，项目各方人员共同讨论，对计划进行细微调整。当然要注意完成的标准：特定水平的bug数量和性能指标等。做了计划就必须得更进，不能当废纸一张。<br>接下来再说说沟通的四大原则：<br>沟通至始至终贯穿了整个项目从0到1的完整生命路线，核心在于内在心态的修炼，然而兵无常势，水无常形，不限于形式，有强大而又积极的心态才是取胜之道。在各种项目问题的解决、进度背后的推进，都凝结着大量的沟通协调。<br>项目沟通中，第一条原则就是敢于尽早暴露问题，只有把问题摆出来了才能调动大家的力量来尽早解决问题。敢于面对问题是一种勇气，也是一种意识和态度。对重要干系的人也是如此，虽然他们希望听到产品顺利交付的好消息，但尽早了解可能存在的问题，一方面可以避免他们向客户传递潜在的有误信息，另一方面可以为团队争取更及时有力的帮助来解决问题。而这些好过，在发布的前一天才知道一切落空。</p>
+<h3 id="原则二，抓住本质"><a href="#原则二，抓住本质" class="headerlink" title="原则二，抓住本质"></a>原则二，抓住本质</h3><p> 只有透过现象看本质，才能在沟通中真正达到求同存异，沟通技巧将问题引向本质而不是具体解决方案，所有的问题聚焦在需求上，而不是需要上面，把双方都放在最高的，容易达成一致的目标上，而不是具体的解决方式上。</p>
+<h3 id="原则三，共情引导"><a href="#原则三，共情引导" class="headerlink" title="原则三，共情引导"></a>原则三，共情引导</h3><p>所谓的共情，就是理解和接纳对方的情绪，充分引导对方把问题和情绪都表达出来，也就开启了沟通的大门，以共情为基础需要在陪伴情绪中洞察问题根源和解决突破口，并适时加以引导。</p>
+<h3 id="原则四，完整解决"><a href="#原则四，完整解决" class="headerlink" title="原则四，完整解决"></a>原则四，完整解决</h3><p>完整解决，并不是具体的沟通技巧，而是如何完整的安排沟通以及使用不同的沟通方式来解决问题，在项目中很少仅凭一人之力就可以解决问题的，尤其是策略性、方向性的问题。需要我们有目标、有计划、有耐心，以积极的心态去面对整个沟通和推进过程。要做到完整解决，首先要有强大的愿力和强大的内心，对目标的期待强度；其次要有敏锐的洞察力和审时度势的能力。需要看清问题的根源和不同角色对问题的影响力及作用，也要看到不同时期不同人对于问题的态度和需求。故有愿景、有坚持、有反馈，这样才能使项目和团队在改进中成长。</p>
+<p>沟通的过程，技巧其次，关键在于沟通的心态和心境，无论是主动尽早、抓住本质、共情引导、完整解决，真正起作用的都是沟通者内在的修炼和积极的心态。</p>
+
+        
+        
+        <p class="article-more-link">
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/08/29/082901/" title="BodyParser中间件" itemprop="url">BodyParser中间件</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="John Doe" target="_blank" itemprop="author">John Doe</a>
+		
+  <p class="article-time">
+    <time datetime="2017-08-29T11:58:38.400Z" itemprop="datePublished"> 发表于 2017-08-29</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <p>bodyParser中间件用来解析http请求体，是express默认使用的中间件之一。</p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><p>### </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line">使用express应用生成器生成一个网站，它默认已经使用了 bodyParser.json 与 bodyParser.urlencoded 的解析功能，除了这两个，bodyParser还支持对text、raw的解析。(可以通过两种方式添加中间件：app.use和app[method],前者用来添加非路由中间件，后者添加路由中间件，)</div><div class="line">app.use(bodyParser.json());</div><div class="line">app.use(bodyParser.urlencoded(&#123; extended: <span class="literal">false</span> &#125;));</div><div class="line">顾名思义，bodyParser.json是用来解析json数据格式的。bodyParser.urlencoded则是用来解析我们通常的form表单提交的数据，也就是请求头中包含这样的信息： Content-Type: application/x-www-form-urlencoded</div><div class="line">常见的四种Content-Type类型：</div><div class="line">application/x-www-form-urlencoded 常见的form提交</div><div class="line">multipart/form-data 文件提交</div><div class="line">application/json 提交json格式的数据</div><div class="line">text/xml 提交xml格式的数据</div><div class="line">bodyParser.urlencoded 模块用于解析req.body的数据，解析成功后覆盖原来的req.body，如果解析失败则为 &#123;&#125;。该模块有一个属性extended：extended选项允许配置使用querystring(<span class="literal">false</span>)或qs(<span class="literal">true</span>)来解析数据，默认值是<span class="literal">true</span></div><div class="line">querystring.parse(<span class="string">"name=henry&amp;age=30"</span>) =&gt; &#123; name: <span class="string">'henry'</span>, age: <span class="string">'30'</span> &#125;</div><div class="line"></div><div class="line">qs是一个querystring的库，在qs的功能基础上，还支持更多的功能并优化了一些安全性。比如，对象解析的支持：</div><div class="line">// 内建对象</div><div class="line"> querystring querystring.parse(<span class="string">"info[name]=henry&amp;info[age]=30&amp;hobby[1]=sport&amp;hobby[2]=coding"</span>) =&gt; &#123; <span class="string">'info[name]'</span>: <span class="string">'henry'</span>, <span class="string">'info[age]'</span>: <span class="string">'30'</span>, <span class="string">'hobby[1]'</span>: <span class="string">'sport'</span>, <span class="string">'hobby[2]'</span>: <span class="string">'coding'</span> &#125; </div><div class="line">// 第三方插件 </div><div class="line">qs qs.parse(<span class="string">"info[name]=henry&amp;info[age]=30&amp;hobby[1]=sport&amp;hobby[2]=coding"</span>) =&gt; &#123; info: &#123; name: <span class="string">'henry'</span>, age: <span class="string">'30'</span> &#125;, hobby: [ <span class="string">'sport'</span>, <span class="string">'coding'</span> ] &#125;</div><div class="line"></div><div class="line">可以看出，querystring并不能正确的解析复杂对象（多级嵌套），而qs却可以做到。</div><div class="line">但是qs也不是万能的，对于多级嵌套的对象，qs只会解析5层嵌套，超出的部分会表现的跟本文头部的那种情况一样；对于数组，qs最大只会解析20个索引，超出的部分将会以键值对的形式解析。</div><div class="line">作为一个中间件，qs必须要为性能考虑，才会有如此多的限制，express也默认使用qs来解析请求体。</div><div class="line">理论上来说，form表单提交不会有多级嵌套的情况，而urlencoded本身也是form的内容类型，因此，bodyParser.urlencoded不支持多级嵌套也是很合理的设计</div><div class="line">请求体解析</div><div class="line">2.1 bodyParser.json() - 解析JSON格式</div><div class="line">2.2 bodyParser.raw() - 解析二进制格式</div><div class="line">2.3 bodyParser.text() - 解析文本格式</div><div class="line">2.4 bodyParser.urlencoded() - 解析文本格式</div><div class="line">bodyParser.json(options) - 解析JSON格式</div><div class="line">返回一个仅解析json格式数据的中间件。这个方法支持任意Unicode编码的请求体，且支持gzip和deflate编码的数据压缩。</div><div class="line">Option是一个包含以下可选值的对象</div><div class="line">inflate - 设置为<span class="literal">true</span>时，deflate压缩数据会被解压缩；设置为<span class="literal">true</span>时，deflate压缩数据会被拒绝。默认为<span class="literal">true</span>。</div><div class="line"><span class="built_in">limit</span> - 设置请求的最大数据量。默认为<span class="string">'100kb'</span></div><div class="line">reviver - 传递给JSON.parse()方法的第二个参数，详见JSON.parse()</div><div class="line">strict - 设置为<span class="literal">true</span>时，仅会解析Array和Object两种格式；设置为<span class="literal">false</span>会解析所有JSON.parse支持的格式。默认为<span class="literal">true</span></div><div class="line"><span class="built_in">type</span> - 该选项用于设置为指定MIME类型的数据使用当前解析中间件。这个选项可以是一个函数或是字符串，当是字符串是会使用<span class="built_in">type</span>-is来查找MIMI类型；当为函数是，中间件会通过fn(req)来获取实际值。默认为application/json。</div><div class="line">verify - 这个选项仅在verify(req, res, buf, encoding)时受支持</div><div class="line"> bodyParser.raw() - 解析二进制格式</div><div class="line">返回一个将所有数据做为Buffer格式处理的中间件。这个方法支持gzip和deflate编码的数据压缩。解析后，其后的所有的req.body中将会是一个Buffer数据。</div><div class="line"></div><div class="line">bodyParser.text() - 解析文本格式</div><div class="line">返回一个仅处理字符串格式处理的中间件。这个方法支持gzip和deflate编码的数据压缩。解析后，其后的所有的req.body中将会是一个字符串值。</div><div class="line"></div><div class="line"></div><div class="line">bodyParser.urlencoded() - 解析文本格式</div><div class="line">返回一个处理urlencoded数据的中间件。这个方法默认使用UTF-8编码，且支持gzip和deflate编码的数据压缩。解析后，其后的所有的req.body中将会是一个键值对对象。</div></pre></td></tr></table></figure>
+        
+        
+        <p class="article-more-link">
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2017/07/29/myblog/" title="Hexo+GitHub搭建个人博客" itemprop="url">Hexo+GitHub搭建个人博客</a>
   </h1>
   <p class="article-author">By
